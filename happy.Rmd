@@ -1,0 +1,384 @@
+---
+title: "happy"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+# Importo i CSV
+```{r}
+happy2015 <- read.csv("C:/Users/Edoardo/Documents/00_Progetto Fondamenti/2015.csv", encoding = "UTF-8")
+
+happy2016 <- read.csv("C:/Users/Edoardo/Documents/00_Progetto Fondamenti/2016.csv", encoding = "UTF-8")
+
+happy2017 <- read.csv("C:/Users/Edoardo/Documents/00_Progetto Fondamenti/2017.csv", encoding = "UTF-8")
+
+happy2018 <- read.csv("C:/Users/Edoardo/Documents/00_Progetto Fondamenti/2018.csv", encoding = "UTF-8")
+
+happy2019 <- read.csv("C:/Users/Edoardo/Documents/00_Progetto Fondamenti/2019.csv", encoding = "UTF-8")
+
+happy_italy <- read.csv("C:/Users/Edoardo/Documents/00_Progetto Fondamenti/italy.csv", encoding = "UTF-8")
+
+# RINOMINO LE COLONNE
+names(happy2015)[names(happy2015) == 'Happiness.Rank'] <- 'Rank'
+names(happy2015)[names(happy2015) == 'Happiness.Score'] <- 'Score'
+names(happy2015)[names(happy2015) == 'Economy..GDP.per.Capita.'] <- 'GDP'
+names(happy2015)[names(happy2015) == 'Health..Life.Expectancy.'] <- 'Life_Expectancy'
+names(happy2015)[names(happy2015) == 'Trust..Government.Corruption.'] <- 'Corruption' 
+
+names(happy2016)[names(happy2016) == 'Happiness.Rank'] <- 'Rank'
+names(happy2016)[names(happy2016) == 'Happiness.Score'] <- 'Score'
+names(happy2016)[names(happy2016) == 'Economy..GDP.per.Capita.'] <- 'GDP'
+names(happy2016)[names(happy2016) == 'Health..Life.Expectancy.'] <- 'Life_Expectancy'
+names(happy2016)[names(happy2016) == 'Trust..Government.Corruption.'] <- 'Corruption' 
+
+names(happy2017)[names(happy2017) == 'Happiness.Rank'] <- 'Rank'
+names(happy2017)[names(happy2017) == 'Happiness.Score'] <- 'Score'
+names(happy2017)[names(happy2017) == 'Economy..GDP.per.Capita.'] <- 'GDP'
+names(happy2017)[names(happy2017) == 'Health..Life.Expectancy.'] <- 'Life_Expectancy'
+names(happy2017)[names(happy2017) == 'Trust..Government.Corruption.'] <- 'Corruption'
+
+names(happy2018)[names(happy2018) == 'Overall.rank'] <- 'Rank'
+names(happy2018)[names(happy2018) == 'Country.or.region'] <- 'Country'
+names(happy2018)[names(happy2018) == 'GDP.per.capita'] <- 'GDP'
+names(happy2018)[names(happy2018) == 'Healthy.life.expectancy'] <- 'Life_Expectancy'
+names(happy2018)[names(happy2018) == 'Freedom.to.make.life.choices'] <- 'Freedom'
+names(happy2018)[names(happy2018) == 'Perceptions.of.corruption'] <- 'Corruption'
+
+names(happy2019)[names(happy2019) == 'Overall.rank'] <- 'Rank'
+names(happy2019)[names(happy2019) == 'Country.or.region'] <- 'Country'
+names(happy2019)[names(happy2019) == 'GDP.per.capita'] <- 'GDP'
+names(happy2019)[names(happy2019) == 'Healthy.life.expectancy'] <- 'Life_Expectancy'
+names(happy2019)[names(happy2019) == 'Freedom.to.make.life.choices'] <- 'Freedom'
+names(happy2019)[names(happy2019) == 'Perceptions.of.corruption'] <- 'Corruption' 
+
+```
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# LIBRERIE
+```{r}
+library("dplyr")
+library("stringr")
+library("ggplot2")
+library("tidyverse")
+library("hrbrthemes")
+library("GGally")
+library("babynames")
+library("tibble")
+library("forcats")
+library("gapminder")
+library("ggrepel")
+library("tidyr")
+library("scales")
+```
+
+# Seleziono le tabelle su cui lavorero' (2015)
+```{r}
+happy2015 %>%
+  select(Rank, Country, Score, GDP, Life_Expectancy, Freedom, Corruption, Generosity, Year)
+```
+
+# Seleziono le tabelle su cui lavorero' (2016)
+```{r}
+happy2016 %>%
+  select(Rank, Country, Score, GDP, Life_Expectancy, Freedom, Corruption, Generosity, Year)
+```
+
+# Seleziono le tabelle su cui lavorero' (2017)
+```{r}
+happy2017 %>%
+  select(Rank, Country, Score, GDP, Life_Expectancy, Freedom, Corruption, Generosity)
+```
+
+# Seleziono le tabelle su cui lavorero' (2018)
+```{r}
+happy2018 %>%
+  select(Rank, Country, Score, GDP, Life_Expectancy, Freedom, Corruption, Generosity,Year)
+```
+
+# Seleziono le tabelle su cui lavorero' (2019)
+```{r}
+happy2019 %>%
+  select(Rank, Country, Score, GDP, Life_Expectancy, Freedom, Corruption, Generosity,Year)
+```
+
+# UNISCO TUTTO
+```{r}
+Reduce(function(x, y) merge(x, y, all=TRUE), list(happy2015, happy2016, happy2017, happy2018, happy2019))
+```
+
+# BARPLOT: THE 15 HAPPIEST COUNTRIES IN 2015
+```{r}
+happyFiltrato <- head(happy2015, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#FF5733", alpha=.6, width=.4) +
+    ggtitle("The 15 happiest countries in 2015") +
+    coord_flip()
+```
+# BARPLOT: THE 15 LEAST HAPPY COUNTRIES IN 2015
+```{r}
+happyFiltrato <- tail(happy2015, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#FF5733", alpha=.6, width=.4) +
+    ggtitle("The 15 least happy countries in 2015") +
+    coord_flip()
+```
+
+# BARPLOT: THE 15 HAPPIEST COUNTRIES IN 2016
+```{r}
+happyFiltrato <- head(happy2016, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#FFCD33", alpha=.6, width=.4) +
+    ggtitle("The 15 happiest countries in 2016") +
+    coord_flip()
+```
+# BARPLOT: THE 15 LEAST HAPPY COUNTRIES IN 2016
+```{r}
+happyFiltrato <- tail(happy2016, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#FFCD33", alpha=.6, width=.4) +
+    ggtitle("The 15 least happy countries in 2016") +
+    coord_flip()
+```
+
+# BARPLOT: THE 15 HAPPIEST COUNTRIES IN 2017
+```{r}
+happyFiltrato <- head(happy2017, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#3AA90C", alpha=.6, width=.4) +
+    ggtitle("The 15 happiest countries in 2017") +
+    coord_flip()
+```
+
+# BARPLOT: THE 15 LEAST HAPPY COUNTRIES IN 2017
+```{r}
+happyFiltrato <- tail(happy2017, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#3AA90C", alpha=.6, width=.4) +
+    ggtitle("The 15 least happy countries in 2017") +
+    coord_flip()
+```
+
+# BARPLOT: THE 15 HAPPIEST COUNTRIES IN 2018
+```{r}
+happyFiltrato <- head(happy2018, 15) %>%
+  arrange(Rank) 
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#0089FF", alpha=.6, width=.4) +
+    ggtitle("The 15 happiest countries in 2018") +
+    coord_flip()
+```
+
+# BARPLOT: THE 15 LEAST HAPPY COUNTRIES IN 2018
+```{r}
+happyFiltrato <- tail(happy2018, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#0089FF", alpha=.6, width=.4) +
+    ggtitle("The 15 least happy countries in 2018") +
+    coord_flip()
+```
+
+# BARPLOT: THE 15 HAPPIEST COUNTRIES IN 2019
+```{r}
+happyFiltrato <- head(happy2019, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#B600FF", alpha=.6, width=.4) +
+    ggtitle("The 15 happiest countries in 2019") +
+    coord_flip()
+```
+
+# BARPLOT: THE 15 LEAST HAPPY COUNTRIES IN 2019
+```{r}
+happyFiltrato <- tail(happy2019, 15) %>%
+  arrange(Rank)
+
+# Barplot
+happyFiltrato %>%
+  mutate(Country = fct_reorder(Country, Score)) %>%
+  ggplot(happyFiltrato, mapping = aes(x=Country, y=Score)) + 
+    geom_bar(stat = "identity", fill="#B600FF", alpha=.6, width=.4) +
+    ggtitle("The 15 least happy countries in 2019") +
+    coord_flip()
+```
+# TREND OF THE AVERAGE HAPPINESS FROM 2015 TO 2019
+```{r}
+  # Create data
+data <- data.frame(
+  year_mean=c("2015", "2016", "2017", "2018", "2019") ,  
+  score_mean=c(mean(happy2015[["Score"]]), mean(happy2016[["Score"]]), mean(happy2017[["Score"]]), mean(happy2018[["Score"]]), mean(happy2019[["Score"]]))
+  )
+
+# Barplot
+ggplot(data, aes(x=year_mean, y=score_mean, group=1)) + 
+  geom_line(stat = "identity", color="#69b3a2", size=1.5, alpha=0.9, linetype=1)  +
+  ggtitle("Trend of the average happiness from 2015 to 2019")
+```
+
+# MEDIE FELICITA'
+```{r}
+mean(happy2015[["Score"]])
+mean(happy2016[["Score"]])
+mean(happy2017[["Score"]])
+mean(happy2018[["Score"]])
+mean(happy2019[["Score"]])
+```
+
+# FELICITA' E GDP
+```{r}
+happy_italy %>%
+
+  ggplot( aes(x=Year)) +
+
+  geom_line(aes(y = Happiness.Score, color="Happiness Score")) + 
+
+  geom_line(aes(y = GDP, color="GDP")) + 
+
+  scale_color_manual(name="Fattori",values = c("red", "green")) +
+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.015)), limits = c(0, NA), labels=comma) +
+
+  scale_x_continuous("Year", labels = as.character(happy_italy$Year), breaks = happy_italy$Year) +
+
+  theme(axis.text.x = element_text(angle = 90)) +
+
+  labs(title="Rapporto Felicità e GDP", y="Fattori")
+```
+
+# FELICITA' E Life.Expectancy
+```{r}
+happy_italy %>%
+
+  ggplot( aes(x=Year)) +
+
+  geom_line(aes(y = Happiness.Score, color="Happiness Score")) + 
+
+  geom_line(aes(y = Life.Expectancy, color="Life Expectancy")) + 
+
+  scale_color_manual(name="Fattori",values = c("red", "green")) +
+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.015)), limits = c(0, NA), labels=comma) +
+
+  scale_x_continuous("Year", labels = as.character(happy_italy$Year), breaks = happy_italy$Year) +
+
+  theme(axis.text.x = element_text(angle = 90)) +
+
+  labs(title="Rapporto Felicità e Aspettativa di vita", y="Fattori")
+```
+
+# FELICITA' E Freedom
+```{r}
+happy_italy %>%
+
+  ggplot( aes(x=Year)) +
+
+  geom_line(aes(y = Happiness.Score, color="Happiness Score")) + 
+
+  geom_line(aes(y = Freedom, color="Freedom")) + 
+
+  scale_color_manual(name="Fattori",values = c("red", "green")) +
+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.015)), limits = c(0, NA), labels=comma) +
+
+  scale_x_continuous("Year", labels = as.character(happy_italy$Year), breaks = happy_italy$Year) +
+
+  theme(axis.text.x = element_text(angle = 90)) +
+
+  labs(title="Rapporto Felicità e Libertà", y="Fattori")
+```
+
+# FELICITA' E Corruption
+```{r}
+happy_italy %>%
+
+  ggplot( aes(x=Year)) +
+
+  geom_line(aes(y = Happiness.Score, color="Happiness Score")) + 
+
+  geom_line(aes(y = Corruption, color="Corruption")) + 
+
+  scale_color_manual(name="Fattori",values = c("red", "green")) +
+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.015)), limits = c(0, NA), labels=comma) +
+
+  scale_x_continuous("Year", labels = as.character(happy_italy$Year), breaks = happy_italy$Year) +
+
+  theme(axis.text.x = element_text(angle = 90)) +
+
+  labs(title="Rapporto Felicità e Corruzione", y="Fattori")
+```
+
+# FELICITA' E Generosity
+```{r}
+happy_italy %>%
+
+  ggplot( aes(x=Year)) +
+
+  geom_line(aes(y = Happiness.Score, color="Happiness Score")) + 
+
+  geom_line(aes(y = Generosity, color="Generosity")) + 
+
+  scale_color_manual(name="Fattori",values = c("red", "green")) +
+
+  scale_y_continuous(expand = expansion(mult = c(0, 0.015)), limits = c(0, NA), labels=comma) +
+
+  scale_x_continuous("Year", labels = as.character(happy_italy$Year), breaks = happy_italy$Year) +
+
+  theme(axis.text.x = element_text(angle = 90)) +
+
+  labs(title="Rapporto Felicità e Generosità", y="Fattori")
+```
+
+
+```{r}
+ggplot(happy_italy, aes(x=Year, y=Happiness.Score)) +
+  geom_line()
+```
